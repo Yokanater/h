@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>My Workspaces</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Create New Workspace</h5>
+                <form action="{{ url_for('new_workspace') }}" method="post">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="name" placeholder="Workspace Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="description" placeholder="Description">
+                    </div>
+                    <button type="submit" class="btn btn-success">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for workspace in workspaces %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ workspace.name }}</h5>
+                <p class="card-text">{{ workspace.description }}</p>
+                <a href="{{ url_for('view_workspace', id=workspace.id) }}" class="btn btn-primary">Open Workspace</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

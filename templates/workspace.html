@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ workspace.name }}</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newNoteModal">
+        Add Note
+    </button>
+</div>
+
+<div class="modal fade" id="newNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('new_note', id=workspace.id) }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" name="note_type" id="noteTypeSelect" onchange="toggleFields()">
+                            <option value="text">Text</option>
+                            <option value="audio">Audio URL</option>
+                            <option value="video">Video URL</option>
+                            <option value="spotify">Spotify Embed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="contentField">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-control" name="content" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3 d-none" id="mediaField">
+                        <label class="form-label">Media URL / Spotify Link</label>
+                        <input type="text" class="form-control" name="media_url">
+                        <small class="text-muted">For Spotify, paste the song/album link.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for note in notes %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ note.title }}</h5>
+                <a href="{{ url_for('delete_note', id=note.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </div>
+            <div class="card-body">
+                {% if note.note_type == 'text' %}
+                    <p class="card-text">{{ note.content }}</p>
+                {% elif note.note_type == 'audio' %}
+                    <audio controls class="w-100">
+                        <source src="{{ note.media_url }}">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <p class="mt-2">{{ note.content }}</p>
+                {% elif note.note_type == 'video' %}
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ note.media_url }}" allowfullscreen></iframe>
+                    </div>
+                    <p class="mt-2">{{ note.content }}</p>
+                {% elif note.note_type == 'spotify' %}
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/{{ note.media_url.split('/')[-1].split('?')[0] }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="mt-2">{{ note.content }}</p>
+                {% endif %}
+                <small class="text-muted">Created: {{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function toggleFields() {
+    const type = document.getElementById('noteTypeSelect').value;
+    const contentField = document.getElementById('contentField');
+    const mediaField = document.getElementById('mediaField');
+    
+    if (type === 'text') {
+        contentField.classList.remove('d-none');
+        mediaField.classList.add('d-none');
+    } else {
+        contentField.classList.remove('d-none');
+        mediaField.classList.remove('d-none');
+    }
+}
+</script>
+{% endblock %}
