@@ -1,98 +1,118 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>{{ workspace.name }}</h2>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newNoteModal">
-        Add Note
-    </button>
-</div>
+<div class="fade-in">
 
-<div class="modal fade" id="newNoteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">New Note</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ url_for('new_note', id=workspace.id) }}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        <input type="text" class="form-control" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Type</label>
-                        <select class="form-select" name="note_type" id="noteTypeSelect" onchange="toggleFields()">
-                            <option value="text">Text</option>
-                            <option value="audio">Audio URL</option>
-                            <option value="video">Video URL</option>
-                            <option value="spotify">Spotify Embed</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="contentField">
-                        <label class="form-label">Content</label>
-                        <textarea class="form-control" name="content" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3 d-none" id="mediaField">
-                        <label class="form-label">Media URL / Spotify Link</label>
-                        <input type="text" class="form-control" name="media_url">
-                        <small class="text-muted">For Spotify, paste the song/album link.</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Note</button>
-                </div>
-            </form>
+    <div class="section-header">
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to Dashboard</a>
+            <h2 class="section-title">{{ workspace.name }}</h2>
         </div>
+        <button class="btn-primary-small" data-bs-toggle="modal" data-bs-target="#newNoteModal">
+            Add Entry
+        </button>
     </div>
-</div>
 
-<div class="row">
-    {% for note in notes %}
-    <div class="col-md-6 mb-3">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ note.title }}</h5>
-                <a href="{{ url_for('delete_note', id=note.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
-            </div>
-            <div class="card-body">
-                {% if note.note_type == 'text' %}
-                    <p class="card-text">{{ note.content }}</p>
-                {% elif note.note_type == 'audio' %}
-                    <audio controls class="w-100">
+    {% if notes|length == 0 %}
+    <div class="zero-state">
+        <p>This workspace is empty. Add your first entry.</p>
+    </div>
+    {% else %}
+    <div class="entry-grid">
+        {% for note in notes %}
+        <div class="entry-card">
+            
+            {% if note.note_type != 'text' %}
+            <div class="entry-media">
+                {% if note.note_type == 'audio' %}
+                    <audio controls style="width: 100%; border-radius: 0;">
                         <source src="{{ note.media_url }}">
-                        Your browser does not support the audio element.
                     </audio>
-                    <p class="mt-2">{{ note.content }}</p>
                 {% elif note.note_type == 'video' %}
                     <div class="ratio ratio-16x9">
                         <iframe src="{{ note.media_url }}" allowfullscreen></iframe>
                     </div>
-                    <p class="mt-2">{{ note.content }}</p>
                 {% elif note.note_type == 'spotify' %}
-                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/{{ note.media_url.split('/')[-1].split('?')[0] }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    <p class="mt-2">{{ note.content }}</p>
+                    <iframe style="border-radius:0" src="https://open.spotify.com/embed/track/{{ note.media_url.split('/')[-1].split('?')[0] }}" width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 {% endif %}
-                <small class="text-muted">Created: {{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            {% endif %}
+
+            <div class="entry-header">
+                <h3 class="entry-title">{{ note.title }}</h3>
+                <a href="{{ url_for('delete_note', id=note.id) }}" class="entry-delete" title="Delete Entry">&times;</a>
+            </div>
+
+            {% if note.content %}
+            <div class="entry-text">{{ note.content }}</div>
+            {% endif %}
+
+            <div class="entry-footer">
+                {{ note.timestamp.strftime('%b %d · %H:%M') }}
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    {% endif %}
+</div>
+
+
+<!-- NEW NOTE MODAL -->
+<div class="modal fade" id="newNoteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-stash">
+      <div class="modal-header modal-stash-header">
+        <h5 class="modal-title">New Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="post" action="{{ url_for('new_note', id=workspace.id) }}">
+        <div class="modal-body modal-stash-body">
+
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="input-field" required autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Format</label>
+            <select name="note_type" class="input-field" id="noteTypeSelect" onchange="toggleFields()">
+              <option value="text">Text Note</option>
+              <option value="audio">Audio Link</option>
+              <option value="video">Video Embed</option>
+              <option value="spotify">Spotify Track</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="contentField">
+            <label class="form-label">Content</label>
+            <textarea name="content" rows="4" class="input-field"></textarea>
+          </div>
+
+          <div class="form-group d-none" id="mediaField">
+            <label class="form-label">Media URL</label>
+            <input type="text" name="media_url" class="input-field" placeholder="https://..." autocomplete="off">
+          </div>
+
+        </div>
+
+        <div class="modal-footer modal-stash-footer">
+          <button type="button" class="btn-secondary-small" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-primary-small">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
 function toggleFields() {
     const type = document.getElementById('noteTypeSelect').value;
-    const contentField = document.getElementById('contentField');
     const mediaField = document.getElementById('mediaField');
-    
+
     if (type === 'text') {
-        contentField.classList.remove('d-none');
         mediaField.classList.add('d-none');
     } else {
-        contentField.classList.remove('d-none');
         mediaField.classList.remove('d-none');
     }
 }

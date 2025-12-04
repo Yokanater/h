@@ -1,24 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Register</h2>
-        <form method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+<div class="auth-container fade-in">
+    <div class="auth-card">
+        <h2 class="auth-title">Create account</h2>
+        <p class="auth-subtitle">Initialize a new secure workspace.</p>
+
+        <form method="post" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="input-field" placeholder="username" required>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="input-field" placeholder="name@example.com" required>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="input-field" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+
+            <button type="submit" class="btn-primary-full">Create Account</button>
         </form>
+
+        <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}" class="link-accent">Sign In</a></p>
     </div>
 </div>
 {% endblock %}
