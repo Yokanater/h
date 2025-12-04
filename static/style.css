@@ -42,8 +42,6 @@ body.page-shell {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    selection-background-color: var(--text-primary);
-    selection-color: var(--bg-body);
 }
 
 ::selection {
