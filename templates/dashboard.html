@@ -1,38 +1,65 @@
+
 {% extends "base.html" %}
 
 {% block content %}
-<h2>My Workspaces</h2>
-
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Create New Workspace</h5>
-                <form action="{{ url_for('new_workspace') }}" method="post">
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="name" placeholder="Workspace Name" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="description" placeholder="Description">
-                    </div>
-                    <button type="submit" class="btn btn-success">Create</button>
-                </form>
-            </div>
+<div class="fade-in">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">Workspaces</h2>
+            <p class="section-desc">Manage your collections.</p>
         </div>
+        <button class="btn-primary-small" data-bs-toggle="modal" data-bs-target="#newWorkspaceModal">
+            Create New
+        </button>
     </div>
+
+    {% if workspaces|length == 0 %}
+    <div class="zero-state">
+        <p>No workspaces found. Initialize one to begin.</p>
+    </div>
+    {% else %}
+    <div class="workspace-grid">
+        {% for workspace in workspaces %}
+        <a href="{{ url_for('view_workspace', id=workspace.id) }}" class="workspace-card">
+            <h3 class="workspace-title">{{ workspace.name }}</h3>
+            <p class="workspace-desc">{{ workspace.description }}</p>
+            <div class="workspace-open">
+                Open Workspace &rarr;
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
-<div class="row">
-    {% for workspace in workspaces %}
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ workspace.name }}</h5>
-                <p class="card-text">{{ workspace.description }}</p>
-                <a href="{{ url_for('view_workspace', id=workspace.id) }}" class="btn btn-primary">Open Workspace</a>
-            </div>
+<!-- NEW WORKSPACE MODAL -->
+<div class="modal fade" id="newWorkspaceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-stash">
+      <div class="modal-header modal-stash-header">
+        <h5 class="modal-title">New Workspace</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="post" action="{{ url_for('new_workspace') }}">
+        <div class="modal-body modal-stash-body">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="input-field" required autocomplete="off" placeholder="e.g. Project Alpha">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input type="text" name="description" class="input-field" autocomplete="off" placeholder="Optional brief">
+          </div>
         </div>
+
+        <div class="modal-footer modal-stash-footer">
+          <button type="button" class="btn-secondary-small" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-primary-small">Create Workspace</button>
+        </div>
+      </form>
     </div>
-    {% endfor %}
+  </div>
 </div>
 {% endblock %}
